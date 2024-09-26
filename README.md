@@ -1,7 +1,3 @@
-# Working Name: Makeup Manager
+# Makeup Manager
 
-TODO (chris): put desription from proposal here
-
-
-
-
+A tool for makeup product bookmarking and tracking.
