@@ -1,0 +1,21 @@
+{
+  "name": "makeup-lib",
+  "version": "1.0.0",
+  "description": "webapp for finding looks",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "session": "node --watch src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChristJohnson/makeup-lib.git"
+  },
+  "author": "Christian Johnson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ChristJohnson/makeup-lib/issues"
+  },
+  "homepage": "https://github.com/ChristJohnson/makeup-lib"
+}
