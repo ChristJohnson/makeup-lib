@@ -1,0 +1,10 @@
+body{background-color:pink; text-align: center;}
+#main-nav{background-color:deeppink;text-align:center;
+}
+#main-nav ul li a{text-decoration:none; color:inherit; font-family:inherit;}
+#main-nav li:hover{background-color: palevioletred; color:white;}
+
+#main-nav ul li{list-style-type: none;
+    display: inline-block;
+    padding:10px;
+    text-align: center;}
