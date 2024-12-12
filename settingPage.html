@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <title> Settings Page </title>
+        <link rel="stylesheet" href="styles.css" defer>
+    </head>
+<body>
+    <body>
+        <div class="settings-container">
+            <h2>Settings</h2>
+            <div class="theme-toggle">
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span class="toggle-label">Dark Mode</span>
+            </div>
+            <div class="user-info">
+                <h3>User Information</h3>
+                <form id="user-form">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" placeholder="Enter your name" required>
+
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" placeholder="Enter your age" required>
+
+                    <button type="submit">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
