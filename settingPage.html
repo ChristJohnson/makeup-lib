@@ -1,34 +1,59 @@
 <html>
-    <head>
-        <title> Settings Page </title>
-        <link rel="stylesheet" href="styles.css" defer>
-    </head>
+<head>
+    <title>Settings</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="" defer></script>
+</head>
 <body>
-    <body>
-        <div class="settings-container">
-            <h2>Settings</h2>
-            <div class="theme-toggle">
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
-                <span class="toggle-label">Dark Mode</span>
-            </div>
-            <div class="user-info">
-                <h3>User Information</h3>
-                <form id="user-form">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" placeholder="Enter your name" required>
+    <!--header -->
+    <header id="header-footerbar">
+        <h1> Settings</h1>
+    </header>
 
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" placeholder="Enter your email" required>
+    <!-- navigation Bar -->
+    <nav id="main-nav">
+        <ul>
+            <li><a href="projectmainpage.html">Home</a></li>
+            <li><a href="About Page.html">About</a></li>
+            <li><a href="Contact Us Page.html">Contact</a></li>
+            <li><a href="settingPage.html">Settings</a></li>
+            <li><a href="userAccount.html">Account</a></li>
 
-                    <label for="age">Age:</label>
-                    <input type="number" id="age" placeholder="Enter your age" required>
+        </ul>
+    </nav>
 
-                    <button type="submit">Save Changes</button>
-                </form>
-            </div>
+    <!-- MAin Settings Content -->
+    <div class="wrapper">
+        <h2>Settings</h2>
+
+        <div class="theme-toggle">
+            <label>
+                <input type="checkbox" id="toggle-theme"> Dark Mode
+            </label>
         </div>
-    </body>
+
+        <form>
+            <div class="form-group">
+                <label for="user-name">Name:</label>
+                <input type="text" id="user-name" placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+                <label for="user-email">Email:</label>
+                <input type="email" id="user-email" placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+                <label for="user-age">Age:</label>
+                <input type="number" id="user-age" placeholder="Enter your age">
+            </div>
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer id="header-footerbar">
+    </footer>
+</body>
 </html>
