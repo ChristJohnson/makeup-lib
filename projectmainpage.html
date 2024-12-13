@@ -1,0 +1,85 @@
+<html>
+<head>
+    <title>Home Page</title>
+    <link rel = "stylesheet" href="style.css">
+    
+    </head>
+    <body>
+        <!--header -->
+        <header id="header-footerbar">
+            <h1> Home</h1>
+        </header>
+    
+        <!-- navigation Bar -->
+        <nav id="main-nav">
+            <ul>
+                <li><a href="projectmainpage.html">Home</a></li>
+                <li><a href="About Page.html">About</a></li>
+                <li><a href="Contact Us Page.html">Contact</a></li>
+                <li><a href="settingPage.html">Settings</a></li>
+                <li><a href="userAccount.html">Account</a></li>
+            </ul>
+        </nav>    
+    <main>
+        <section id="home-recommendations">
+        </section>
+    </main>
+    <script>
+        
+        fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
+            .then(response => response.json())
+            .then(data => {
+                const recommendations = document.getElementById('recommendations');
+                data.slice(0, 10).forEach(product => {
+                   
+                    const productCard = document.createElement('div');
+                    productCard.classList.add('product-card');
+                    productCard.innerHTML = `
+                        <img src="${product.image_link}" alt="${product.name}">
+                        <h2>${product.name}</h2>
+                        <p>${product.brand}</p>
+                        <p>$${product.price}</p>
+                    `;
+                    recommendations.appendChild(productCard);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    </script>
+</body>
+</html>
+
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
