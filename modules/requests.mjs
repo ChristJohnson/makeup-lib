@@ -43,7 +43,7 @@ function handleApi(req, res) {
  * @param {Response} res standard HTTP Response object
  */
 function handleWebsite(url, res) {
-  let filename = "/index.html";
+  let filename = undefined;
   let contentType = "text/html";
 
   if (url.length != 0) {
@@ -58,12 +58,23 @@ function handleWebsite(url, res) {
       case "css":
         contentType = "text/css";
         break;
+      default:
+        filename = "/index.html";
+        contentType = "text/html";
+        break;
     }
   }
 
+  console.log(
+    `Fetching ./frontend${filename} with Content-Type: ${contentType}, according to url: ${[
+      filename,
+      url,
+    ].join()}`
+  );
+
   try {
     // throws if unable to read file
-    let file = readFileSync(`./frontend/${filename}`);
+    let file = readFileSync(`./frontend${filename}`);
 
     res.setHeader("Content-Type", contentType);
     res.writeHead(200);
