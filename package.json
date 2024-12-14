@@ -1,0 +1,22 @@
+{
+  "name": "makeup-lib",
+  "version": "1.0.0",
+  "description": "A tool for makeup product bookmarking and tracking.",
+  "main": "modules/app.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node modules/app.mjs",
+    "session": "node --watch modules/app.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChristJohnson/makeup-lib.git"
+  },
+  "author": "ChristJohnson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ChristJohnson/makeup-lib/issues"
+  },
+  "homepage": "https://github.com/ChristJohnson/makeup-lib#readme"
+}
