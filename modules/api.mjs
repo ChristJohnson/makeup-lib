@@ -1,5 +1,11 @@
 import { appendFile } from "node:fs/promises";
-import {} from "node:http";
+
+export const name = "makeup-api";
+
+const pred_contactme = (email, message) => `====FROM: ${email}====
+DATE: ${new Date()}
+${message}
+`;
 
 /**
  * This file implements elements of CRUD for endpoints:
@@ -12,12 +18,29 @@ import {} from "node:http";
  * @param {Request} request standard
  * @param {Response} response standard
  */
-async function endpointContactme(request, response) {
+export async function epContactme(request, response) {
   const rawBody = await getBody(request);
-  console.log(rawBody);
   const body = JSON.parse(rawBody);
+  console.log(body);
 
-  appendFile("../contactme.txt", _);
+  const hasEmail = body.hasOwnProperty("email");
+  const hasMessage = body.hasOwnProperty("message");
+
+  if (!hasEmail || !hasMessage) {
+    response.statusCode = 400;
+    response.statusMessage = `Invalid object: no ${hasEmail ? "" : "email"}${
+      !hasEmail && !hasMessage ? " or " : ""
+    }${hasMessage ? "" : "message"} property!`;
+    response.end();
+    return;
+  }
+
+  appendFile("./contactme.txt", pred_contactme(body.email, body.message));
+
+  response.statusCode = 200;
+  response.setHeader("Content-Type", "application/json");
+  response.setHeader("Content-Length", Buffer.byteLength(rawBody));
+  response.end(rawBody);
 }
 
 /**
