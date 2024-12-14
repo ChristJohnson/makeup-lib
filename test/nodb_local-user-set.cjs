@@ -7,7 +7,7 @@ console.log(`sending request to ${url}`);
 
 const postData = JSON.stringify({
   name: "Chris Johnson",
-  email: "test@amorfati.work",
+  email: "test@example.com",
   age: 22,
 });
 

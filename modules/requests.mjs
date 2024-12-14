@@ -9,7 +9,7 @@ const ep_id = (id) => `/user/${id}`;
 
 const methods = new Map();
 methods.set(ep_contact, ["POST"]);
-methods.set(ep_user, ["POST", "GET", "PUT"]); // use for /user/id
+methods.set(ep_user, ["POST", "GET"]); // TODO: "PUT"
 
 // splits url paths like
 const RE_PATH_SPLIT = /(?<=.)(?=\/)+/;
@@ -29,25 +29,25 @@ export function requestListener(request, response) {
  * Handles all endpoints in /api in a RESTful manner.
  *
  * Queries:
- * - POST /contactme  -- create new contactme data
- * - POST /user       -- create new user information (body contains flags)
- * - GET  /user/[ID]  -- read user information (body contains flats)
- * - PUT  /user/[ID]  -- update user information (body contains flags)
+ * - POST /contactme                    -- create new contactme data
+ * - POST /user                         -- create new user information (body contains flags)
+ * - GET  /user?id=[ID]&flags=[FLAGS]   -- read user information (body contains flats)
+ * - PUT  /user                         -- update user information (body contains flags)
  *
  * Flags:
- * - UserData:           body contains account data
- * - Palette:            body contains palette data
- * - Preferences:        body contains preference data
+ * - UserData:      1 [001]: body contains account data
+ * - Palette:       2 [010]: body contains palette data
+ * - Preferences:   4 [100]: body contains preference data
  *
  * @param {Request} req standard HTTP Request object
  * @param {Response} res standard HTTP Response object
  */
 function handleApi(req, res) {
   console.log(req.method, "sent to", req.url);
-  let path = req.url.slice(4);
+  let path = getPath(req);
 
   if (!methods.has(path)) {
-    res.writeHead(501); //
+    res.writeHead(501); // Not listed as implemented
     res.end();
     return;
   }
@@ -122,4 +122,8 @@ function handleWebsite(url, res) {
     res.writeHead(501);
     res.end();
   }
+}
+
+function getPath(req) {
+  return req.url.slice(4).split("?")[0];
 }
