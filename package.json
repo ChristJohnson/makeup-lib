@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/ChristJohnson/makeup-lib/issues"
   },
-  "homepage": "https://github.com/ChristJohnson/makeup-lib#readme"
+  "homepage": "https://github.com/ChristJohnson/makeup-lib#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.7"
+  }
 }

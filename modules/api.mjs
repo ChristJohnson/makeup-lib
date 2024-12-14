@@ -1,4 +1,6 @@
 import { appendFile } from "node:fs/promises";
+import { getPalettesByUser, getUser } from "./supabase.mjs";
+import { addUser, addPalette } from "./supabase.mjs";
 
 export const name = "makeup-api";
 
@@ -11,7 +13,6 @@ ${message}
 // compare with bitwise AND (&)
 const USERDATA = 1;
 const PALETTE = 2;
-const PREFERENCES = 4;
 
 /**
  * This file implements elements of CRUD for endpoints:
@@ -32,7 +33,6 @@ export async function epUser(request, response) {
   const url = new URL(
     `http://${process.env.HOST ?? "localhost"}${request.url}`
   );
-  // console.log(url);
 
   if ("POST" == method) {
     const body = JSON.parse(await getBody(request));
@@ -48,54 +48,58 @@ export async function epUser(request, response) {
 
     if ((USERDATA & flags) > 0) {
       bodyProperties = objectHasOwnProperties(body, "name", "email", "age");
-
       if (!bodyProperties.allPresent) {
         respondBodyInvalid(bodyProperties, response);
         return;
       }
 
-      // TODO: set information in supabase
-      // TODO: get & append proper UUID for entry to object
-      body[id] = 1;
+      body["id"] = addUser(body.name, body.email, body.age);
     }
 
     if ((PALETTE & flags) > 0) {
-      // TODO: implement (need structure)
-    }
+      bodyProperties = objectHasOwnProperties(
+        body,
+        "user_id",
+        "palette_name",
+        "palette_data"
+      );
+      if (!bodyProperties.allPresent) {
+        respondBodyInvalid(bodyProperties, response);
+        return;
+      }
 
-    if ((PREFERENCES & flags) > 0) {
-      // TODO: implement (need structure)
+      body["palette_id"] = addPalette(
+        body.user_id,
+        body.palette_name,
+        body.palette_data
+      );
     }
 
     replyGood(body, response);
   }
 
   // /api/user?id=[ID]&flags=[FLAGS]
-  // /api/user?email=[EMAIL] -> [ID]
   if ("GET" == method) {
-    let flags = url.searchParams.get("flags");
-    if ("" == flags) flags = "0";
-    flags = parseInt(flags);
+    let flagString = url.searchParams.get("flags");
+    const flags = parseInt(flagString);
+    const user_id = url.searchParams.get("id");
+    if ("" == flagString) flagString = "0";
 
     const body = {};
-    // TODO(database team): populate from supabase
-    // TODO(database team): remove dummy data
 
     if ((USERDATA & flags) > 0) {
-      // TODO: remove these lines
-      body["name"] = "Chris Johnson";
-      body["email"] = "test@example.com";
-      body["age"] = 22;
+      const data = getUser(user_id);
+      for (const key of data) {
+        body[key] = data[key];
+      }
     }
 
     if ((PALETTE & flags) > 0) {
-      // TODO: implement (need structure)
+      let palettes = getPalettesByUser(user_id);
       body["palettes"] = [];
-    }
-
-    if ((PREFERENCES & flags) > 0) {
-      // TODO: implement (need structure)
-      body["preferences"] = {};
+      for (const key in palettes) {
+        body["palettes"].push(palettes[key]);
+      }
     }
 
     replyGood(body, response);

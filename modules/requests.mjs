@@ -35,9 +35,8 @@ export function requestListener(request, response) {
  * - PUT  /user                         -- update user information (body contains flags)
  *
  * Flags:
- * - UserData:      1 [001]: body contains account data
- * - Palette:       2 [010]: body contains palette data
- * - Preferences:   4 [100]: body contains preference data
+ * - UserData:      1 [01]: body contains account data
+ * - Palette:       2 [10]: body contains palette data
  *
  * @param {Request} req standard HTTP Request object
  * @param {Response} res standard HTTP Response object
