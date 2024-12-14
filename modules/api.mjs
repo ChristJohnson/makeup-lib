@@ -14,33 +14,45 @@ ${message}
  */
 
 /**
+ * Accepted Methods: POST
+ *
+ * Parses the request's body to update the contactme file.
+ * @param {Request} request standard
+ * @param {Response} response standard
+ */
+export async function epUser(request, response) {
+  // TODO(chris): demultiplex request handling on method
+  // NOTE(chris): assuming SET -- create
+  const body = JSON.parse(await getBody(request));
+  const bodyProperties = objectHasOwnProperties(body, "name", "email", "age");
+
+  if (!bodyProperties.allPresent) {
+    respondRequestBodyInvalid(bodyProperties, response);
+    return;
+  }
+
+  pingpongRequestBody(body, response);
+}
+
+/**
+ * Accepted Methods: POST
+ *
  * Parses the request's body to update the contactme file.
  * @param {Request} request standard
  * @param {Response} response standard
  */
 export async function epContactme(request, response) {
-  const rawBody = await getBody(request);
-  const body = JSON.parse(rawBody);
-  console.log(body);
+  const body = JSON.parse(await getBody(request));
+  const bodyProperties = objectHasOwnProperties(body, "email", "message");
 
-  const hasEmail = body.hasOwnProperty("email");
-  const hasMessage = body.hasOwnProperty("message");
-
-  if (!hasEmail || !hasMessage) {
-    response.statusCode = 400;
-    response.statusMessage = `Invalid object: no ${hasEmail ? "" : "email"}${
-      !hasEmail && !hasMessage ? " or " : ""
-    }${hasMessage ? "" : "message"} property!`;
-    response.end();
+  if (!bodyProperties.allPresent) {
+    respondRequestBodyInvalid(bodyProperties, response);
     return;
   }
 
   appendFile("./contactme.txt", pred_contactme(body.email, body.message));
 
-  response.statusCode = 200;
-  response.setHeader("Content-Type", "application/json");
-  response.setHeader("Content-Length", Buffer.byteLength(rawBody));
-  response.end(rawBody);
+  pingpongRequestBody(body, response);
 }
 
 /**
@@ -64,4 +76,48 @@ async function getBody(req) {
       reject(err);
     });
   });
+}
+
+function objectHasOwnProperties(obj, ...properties) {
+  const status = {
+    allPresent: true,
+    absent: [],
+  };
+
+  for (const key of properties) {
+    if (!Object.hasOwn(obj, key)) {
+      status.allPresent = false;
+      status.absent.push(key);
+    }
+  }
+
+  return status;
+}
+
+/**
+ * WARNING: CONSUMES `response`
+ * @param {*} properties
+ * @param {*} response
+ */
+function respondRequestBodyInvalid(properties, response) {
+  response.statusCode = 400;
+  response.statusMessage = `Invalid request body: no ${properties.absent
+    .join(", ")
+    .replace(/, (?!.*, )/, ", or ")} property`;
+  response.end();
+}
+
+/**
+ * WARNING: CONSUMES `response`
+ * @param {*} properties
+ * @param {*} response
+ */
+function pingpongRequestBody(body, response) {
+  if (typeof body != "string") {
+    body = JSON.stringify(body);
+  }
+  response.statusCode = 200;
+  response.setHeader("Content-Type", "application/json");
+  response.setHeader("Content-Length", Buffer.byteLength(body));
+  response.end(body);
 }

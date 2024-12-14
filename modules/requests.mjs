@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { epContactme } from "./api.mjs";
+import { epContactme, epUser } from "./api.mjs";
 
 export const name = "requests";
 
@@ -61,6 +61,10 @@ function handleApi(req, res) {
   switch (path) {
     case ep_contact:
       epContactme(req, res);
+      break;
+
+    case ep_user:
+      epUser(req, res);
       break;
 
     default:
