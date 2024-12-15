@@ -1,0 +1,265 @@
+<html>
+    <head>
+        <title>Home Page</title>
+        <link rel = "stylesheet" href="style.css">
+        <script src="js/account.js" defer></script>
+    </head>
+
+    <body>
+        <!--header -->
+        <header id="header-footerbar">
+            <h1> Makeup Manager</h1>
+        </header>
+    
+        <!-- navigation Bar -->
+        <nav id="main-nav">
+            <ul>
+                <li><a href="projectmainpage.html">Home</a></li>
+                <li><a href="About Page.html">About</a></li>
+                <li><a href="Contact Us Page.html">Contact</a></li>
+                <li><a href="settingPage.html">Settings</a></li>
+                <li><a href="userAccount.html">Account</a></li>
+            </ul>
+        </nav>   
+        
+        <!-- loading popup -->
+        <div id="loading-popup">Loading recommendations, please wait 12 seconds...</div>
+
+        <!-- search bar -->
+        <div id="search-container">
+            <input type="text" id="search-bar" placeholder="Search for any products..." />
+        </div>
+
+        <main>
+            <!-- filter section -->
+            <aside id="filter-container">
+                <h3>Product Filters:</h3>
+                <ul>
+                    <li><input type="checkbox" id="foundation" name="foundation"> Foundation</li>
+                    <li><input type="checkbox" id="concealer" name="concealer"> Concealer</li>
+                    <li><input type="checkbox" id="bronzer" name="bronzer"> Bronzer</li>
+                    <li><input type="checkbox" id="lipstick" name="lipstick"> Lipstick</li>
+                    <li><input type="checkbox" id="nail-polish" name="nail_polish"> Nail Polish</li>
+                    <li><input type="checkbox" id="blush" name="blush"> Blush</li>
+                    <li><input type="checkbox" id="powder" name="powder"> Powder</li>
+                </ul>
+                <br>
+                <h3>Skin Tone Filters:</h3>
+                <ul>
+                    **This filter can ONLY be applied when foundation, concealer, and bronzer products are filtered**
+                </ul>
+                    <ul>
+                        <li><input type="radio" id="skin-tone-fair" name="skin-tone" value="fair"> Light</li>
+                        <li><input type="radio" id="skin-tone-medium" name="skin-tone" value="medium"> Medium</li>
+                        <li><input type="radio" id="skin-tone-dark" name="skin-tone" value="dark"> Dark</li>
+                        <li><input type="radio" id="skin-tone-none" name="skin-tone" value="none" checked> No Filter Applied</li>
+                    </ul>
+                <br>
+                <h3>Price Filters:</h3>
+                <ul>
+                    <li><input type="checkbox" id="under-10" name="under-10"> Under $10</li>
+                    <li><input type="checkbox" id="10-20" name="10-20"> $10 - $20</li>
+                    <li><input type="checkbox" id="20-50" name="20-50"> $20 - $50</li>
+                    <li><input type="checkbox" id="50-plus" name="50-plus"> $50 and above</li>
+                </ul>
+            </aside>
+
+            <!-- recommendations section with headers-->
+            <section id="home-recommendations">
+                <h2>Welcome to Makeup Manager!</h2>
+                <br>
+                <br>
+                <h2>Makeup reccomendations for you: </h2>
+                <br>
+                <br>
+                <div id="recommendation-grid"></div>
+            </section>
+        </main>
+
+        <br>
+        <!-- Footer -->
+        <footer id="footer">
+            <p>Copyright by MakeupManager</p>
+        </footer>
+
+        <script>
+            const recommendationsGrid = document.getElementById('recommendation-grid');
+            const filterContainer = document.getElementById('filter-container');
+            const searchBar = document.getElementById('search-bar');
+            const loadingPopup = document.getElementById('loading-popup');
+
+            let allProducts = [];
+            let filteredProducts = [];
+            let savedProducts = []; 
+
+            function showLoading() {
+                loadingPopup.style.display = 'flex';
+                loadingPopup.innerText = 'Loading recommendations, please wait...';
+            }
+
+            function hideLoading() {
+                loadingPopup.style.display = 'none';
+            }
+
+            showLoading();
+            fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
+                .then(response => response.json())
+                .then(data => {
+                    allProducts = data.map(product => {
+                        if (product.product_type === "foundation") {
+                            if (product.name.toLowerCase().includes("concealer")) {
+                                product.category = "concealer";
+                            } else if (product.name.toLowerCase().includes("bronzer")) {
+                                product.category = "bronzer";
+                            } else {
+                                product.category = "foundation";
+                            }
+                        } else {
+                            product.category = product.product_type;
+                        }
+                        return product;
+                    });
+
+                    filteredProducts = allProducts;
+                    displayProducts(filteredProducts);
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    loadingPopup.innerText = 'Failed to load recommendations. Please try again later.';
+                });
+
+            function displayProducts(products) {
+                recommendationsGrid.innerHTML = '';
+                if (products.length === 0) {
+                    recommendationsGrid.innerHTML = '<p><--- Select a product</p>';
+                    return;
+                }
+
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.classList.add('product-card');
+
+                    const hexValue = product.product_colors && product.product_colors.length > 0 
+                        ? product.product_colors[0].hex_value 
+                        : null;
+
+                    productCard.innerHTML = `
+                        <img src="${product.image_link || 'https://via.placeholder.com/200'}" alt="${product.name}">
+                        <h2>${product.name}</h2>
+                        <p>${product.brand || 'Unknown Brand'}</p>
+                        <p>$${product.price || 'N/A'}</p>
+                        <p>Color: ${hexValue || 'N/A'}</p>
+                        <button class="save-btn" data-id="${product.id}">Save</button>
+                    `;
+                    recommendationsGrid.appendChild(productCard);
+                });
+
+                document.querySelectorAll('.save-btn').forEach(button => {
+                    button.addEventListener('click', () => saveProduct(button.getAttribute('data-id')));
+                });
+            }
+
+            searchBar.addEventListener('input', () => {
+                const searchQuery = searchBar.value.toLowerCase();
+
+                const searchedProducts = filteredProducts.filter(product =>
+                    product.name.toLowerCase().includes(searchQuery) ||
+                    (product.brand && product.brand.toLowerCase().includes(searchQuery))
+                );
+
+                displayProducts(searchedProducts);
+            });
+
+            filterContainer.addEventListener('change', () => {
+                showLoading();
+
+                const activeCategories = Array.from(filterContainer.querySelectorAll('input[name]:checked'))
+                    .map(input => input.name);
+                const skinToneFilter = document.querySelector('input[name="skin-tone"]:checked').value;
+
+                const priceFilters = Array.from(filterContainer.querySelectorAll('input[name^="under"], input[name^="10"], input[name^="20"], input[name^="50"]'))
+                    .filter(input => input.checked)
+                    .map(input => input.name);
+
+                const isSkinToneApplicable = activeCategories.includes("foundation") ||
+                                            activeCategories.includes("concealer") ||
+                                            activeCategories.includes("bronzer");
+
+                document.querySelectorAll('input[name="skin-tone"]').forEach(input => {
+                    input.disabled = !isSkinToneApplicable;
+                });
+
+                filteredProducts = allProducts;
+
+                if (activeCategories.length > 0) {
+                    filteredProducts = filteredProducts.filter(product => activeCategories.includes(product.category));
+                }
+
+                if (isSkinToneApplicable && skinToneFilter !== "none") {
+                    filteredProducts = filteredProducts.filter(product => {
+                        const hexValue = product.product_colors && product.product_colors.length > 0 
+                            ? product.product_colors[0].hex_value 
+                            : null;
+
+                        const tone = hexValue ? getSkinToneFromHex(hexValue) : null;
+                        return tone === skinToneFilter;
+                    });
+                }
+
+                if (priceFilters.length > 0) {
+                    filteredProducts = filteredProducts.filter(product => {
+                        const price = parseFloat(product.price) || 0;
+
+                        return (
+                            (priceFilters.includes("under-10") && price < 10) ||
+                            (priceFilters.includes("10-20") && price >= 10 && price <= 20) ||
+                            (priceFilters.includes("20-50") && price > 20 && price <= 50) ||
+                            (priceFilters.includes("50-plus") && price > 50)
+                        );
+                    });
+                }
+
+                setTimeout(() => {
+                    displayProducts(filteredProducts);
+                    hideLoading();
+                }, 1000);
+            });
+
+            function hexToRgb(hex) {
+                const bigint = parseInt(hex.replace("#", ""), 16);
+                return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+            }
+
+            function getSkinToneFromHex(hexValue) {
+                if (!hexValue) return null;
+                const { r, g, b } = hexToRgb(hexValue);
+                const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                if (brightness > 200 && r > 200 && g > 180) return "fair";
+                if (brightness > 100 && r > 100 && g > 80 && b > 50) return "medium";
+                return "dark";
+            }
+
+
+            function saveProductToTemporaryStorage(productId) {
+            const product = allProducts.find(p => p.id == productId);
+            let savedProducts = JSON.parse(localStorage.getItem("savedProducts")) || [];
+
+            if (!savedProducts.some(p => p.id === product.id)) {
+                savedProducts.push(product);
+                localStorage.setItem("savedProducts", JSON.stringify(savedProducts));
+                alert(`"${product.name}" has been temporarily saved.`);
+            } else {
+                alert(`"${product.name}" is already saved.`);
+            }
+        }
+
+        document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("save-btn")) {
+                const productId = e.target.getAttribute("data-id");
+                saveProductToTemporaryStorage(productId);
+            }
+        });
+    </script>
+    </body>
+</html>

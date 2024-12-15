@@ -1,12 +1,15 @@
 <html>
   <head>
     <title>About</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="style.css">
+    <!--JS Library: Swiper-->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script> 
+</head>
+<body>
     <!--header -->
     <header id="header-footerbar">
-      <h1>About</h1>
+        <h1>About Us</h1>
     </header>
 
     <!-- navigation Bar -->
@@ -20,31 +23,129 @@
       </ul>
     </nav>
 
+    <div id="loading-popup">Loading slideshow, please wait...</div>
+
     <!-- Main Content -->
-    <div class="wrapper">
-      <h2>Mission Statement</h2>
-      <p>
-        Makeup Manager was founded in 2024 and is catered to a wide variety of
-        audiences, ranging from beginners to beauty influencers, to streamline
-        finding accessible and affordable beauty products that cater to many
-        different skin tones. We aim to address the lack of accessibility in
-        finding compatible skincare and makeup products, particularly when
-        shopping online. With the vast variety of makeup brands, products, and
-        shades available, customers often find it overwhelming and
-        time-consuming to select products that match their skin tone and
-        undertones. Our website aims to streamline this process, making it
-        easier for individuals to discover and save preferred items in a
-        personalized color palette.
-      </p>
+    <div class="main-content">
+        <!-- Wrapper -->
+        <div class="aboutWrapper">
+            <h1>Why MakeupManager? </h1>
+            <br>
+            <h2 style="color: #c32e38;"> Mission Statement</h2>
+            <p>
+                Makeup Manager was founded in 2024 and is catered to a wide variety of audiences, ranging from beginners to beauty influencers, to streamline finding accessible and affordable beauty products that cater to many different skin tones. 
+                We aim to address the lack of accessibility in finding compatible skincare and makeup products, particularly when shopping online. 
+                With the vast variety of makeup brands, products, and shades available, customers often find it overwhelming and time-consuming to select products that match their skin tone and undertones. 
+                Our website aims to streamline this process, making it easier for individuals to discover and save preferred items in a personalized color palette.
+            </p>
+    
+            <h2 style="color: #c32e38;"> History</h2>
+            <p>The makeup industry has grealty struggled with inclusivity, especially in foundation shades. 
+                Many brands, like YSL, BeautyBlender, and Tarte, offer limited options that are restricted to "light, medium, and dark" tones in foundations. 
+                In contrast, brands like Fenty Beauty and Huda Beauty addressed this gap with 40 and 30 shades, promoting diversity in makeup (Jilek, 2022).</p>
 
-      <h2>History</h2>
-      <p>---</p>
+            <p>Our Makeup API contains of over 44,000 products and aims to bridge this gap, helping users find products that meet their unique skin tones, product preferences, and overall budget, all in one platform.</p>
+    
+            <h2 style="color: #c32e38;"> Fun Facts & Common Myths</h2>
+            <ul>
+                <li><b>Makeup DOES expire: </b>Don't use very old makeup products - it can cause eye irritation or infections.</li>
+                <br>
+                <li><b>Natural products are NOT 100% safe: </b>Although your makeup is made with natural ingreidents, it doesn't mean you can't get an allergic reaction or
+                skin irriation from it.</li>
+                <br>
+                <li><b>Earliest Makeup contained deadly ingreidents: </b>Lead and arsenic were commonly used in makeup products in anciet makeup products.</li>
+                <br>
+                <li><b>Red lipstick = Symbol of Solidarity: </b>During WW2, it was viewed as patriotic duty for all women to wear red lipstick to spite hitler and as a form of protest 
+                because he despited it. It was used often used in propaganda.</li>
+            </ul>
 
-      <h2>Fun Facts About Makeup</h2>
-      <p>----</p>
+            <br>
+            <h4>References: </h4>
+            <p>Fun Makeup Facts and common myths explained. MPlus Cosmetics. (2024, September 11). https://www.mpluscosmetics.com/blog/fun-makeup-facts-and-common-myths-explained/ </p>
+            <p>Jilek, A. B. S. (2023, March 30). Makeup lacks options for individuals with different skin tones. News. https://news.illinoisstate.edu/2022/03/makeup-lacks-options-for-individuals-with-different-skin-tones/ </p>
+
+        </div>
+    
+        <!-- Slideshow Aside -->
+        <aside class="slideshow-container">
+            <h2>MakeupManager Products</h2>
+            <br>
+            <div class="swiper">
+                <div class="swiper-wrapper" id="swiper-wrapper">
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </aside>
     </div>
 
+    <br>
     <!-- Footer -->
-    <footer id="header"></footer>
-  </body>
+    <footer id="footer">
+     <p>Copyright by MakeupManager</p>
+   </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const swiperWrapper = document.getElementById('swiper-wrapper');
+            const loadingPopup = document.getElementById('loading-popup');
+            const swiperContainer = document.querySelector('.swiper');
+
+            function showLoading() {
+                loadingPopup.style.display = 'flex'; 
+                loadingPopup.innerText = 'Loading recommendations, please wait...';
+            }
+
+            function hideLoading() {
+                loadingPopup.style.display = 'none'; 
+            }
+
+            loadingPopup.style.display = 'flex';
+            swiperContainer.style.display = 'none';
+
+            fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
+                .then(response => response.json())
+                .then(data => {
+                    const productsWithImages = data.filter(product => product.image_link);
+                    const randomProducts = getRandomProducts(productsWithImages, 10);
+
+                    randomProducts.forEach(product => {
+                        const slide = document.createElement('div');
+                        slide.className = 'swiper-slide';
+                        slide.innerHTML = `<img src="${product.image_link}" alt="Makeup Product">`;
+                        swiperWrapper.appendChild(slide);
+                    });
+
+                    new Swiper('.swiper', {
+                        loop: true,
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                        },
+                        pagination: {
+                            el: '.swiper-pagination',
+                            clickable: true,
+                        },
+                    });
+
+                    loadingPopup.style.display = 'none';
+                    swiperContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching makeup products:', error);
+                    loadingPopup.innerText = 'Failed to load products. Please try again later.';
+                });
+
+            function getRandomProducts(array, count) {
+                const randomIndices = new Set();
+                while (randomIndices.size < count) {
+                    const randomIndex = Math.floor(Math.random() * array.length);
+                    randomIndices.add(randomIndex);
+                }
+                return Array.from(randomIndices).map(index => array[index]);
+            }
+        });
+    </script>
+    </body>
 </html>
