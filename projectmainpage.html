@@ -26,7 +26,7 @@
 
         <!-- search bar -->
         <div id="search-container">
-            <input type="text" id="search-bar" placeholder="Search for products..." />
+            <input type="text" id="search-bar" placeholder="Search for any products..." />
         </div>
 
         <main>
@@ -68,10 +68,16 @@
             const loadingPopup = document.getElementById('loading-popup');
             const recommendationsGrid = document.getElementById('recommendation-grid');
             const filterContainer = document.getElementById('filter-container');
+            const searchBar = document.getElementById('search-bar');
 
             let allProducts = [];
             let filteredProducts = [];
             let savedProducts = [];
+
+            loadingPopup.style.display = 'flex'; 
+            setTimeout(() => {
+                loadingPopup.innerText = 'Still loading, please wait...'; 
+            }, 5000); // Update the message after 5 seconds of waiting
 
             fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
                 .then(response => response.json())
@@ -88,16 +94,18 @@
                         }
                         return product;
                     });
+
                     filteredProducts = getRandomProducts(allProducts, 24);
-                    displayProducts(filteredProducts);
-                    loadingPopup.style.display = 'none'; 
+                                
+                    setTimeout(() => {
+                        displayProducts(filteredProducts);
+                        loadingPopup.style.display = 'none'; 
+                    }, 1000); // 1-second delay
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
                     loadingPopup.innerText = 'Failed to load recommendations. Please try again later.';
                 });
-            
-                const searchBar = document.getElementById('search-bar');
 
                 searchBar.addEventListener('input', () => {
                     const searchQuery = searchBar.value.toLowerCase();
