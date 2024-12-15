@@ -22,7 +22,8 @@
 
         </ul>
     </nav>
-    
+
+    <div id="loading-popup">Loading slideshow, please wait...</div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -63,16 +64,27 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const swiperWrapper = document.getElementById('swiper-wrapper');
+            const loadingPopup = document.getElementById('loading-popup');
+            const swiperContainer = document.querySelector('.swiper');
 
-            // Fetch products from the Makeup API
+            function showLoading() {
+                loadingPopup.style.display = 'flex'; 
+                loadingPopup.innerText = 'Loading recommendations, please wait...';
+            }
+
+            function hideLoading() {
+                loadingPopup.style.display = 'none'; 
+            }
+
+            loadingPopup.style.display = 'flex';
+            swiperContainer.style.display = 'none';
+
             fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
                 .then(response => response.json())
                 .then(data => {
-                    // Filter products with valid image links and select 10 random ones
                     const productsWithImages = data.filter(product => product.image_link);
                     const randomProducts = getRandomProducts(productsWithImages, 10);
 
-                    // Create slides with only images
                     randomProducts.forEach(product => {
                         const slide = document.createElement('div');
                         slide.className = 'swiper-slide';
@@ -80,7 +92,6 @@
                         swiperWrapper.appendChild(slide);
                     });
 
-                    // Initialize Swiper
                     new Swiper('.swiper', {
                         loop: true,
                         navigation: {
@@ -92,10 +103,15 @@
                             clickable: true,
                         },
                     });
-                })
-                .catch(error => console.error('Error fetching makeup products:', error));
 
-            // Function to get random products
+                    loadingPopup.style.display = 'none';
+                    swiperContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching makeup products:', error);
+                    loadingPopup.innerText = 'Failed to load products. Please try again later.';
+                });
+
             function getRandomProducts(array, count) {
                 const randomIndices = new Set();
                 while (randomIndices.size < count) {
@@ -106,5 +122,5 @@
             }
         });
     </script>
-    </body>
+</body>
 </html>
