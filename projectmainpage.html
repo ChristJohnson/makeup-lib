@@ -1,13 +1,13 @@
 <html>
-<head>
-    <title>Home Page</title>
-    <link rel = "stylesheet" href="style.css">
-    
+    <head>
+        <title>Home Page</title>
+        <link rel = "stylesheet" href="style.css">
     </head>
+
     <body>
         <!--header -->
         <header id="header-footerbar">
-            <h1> Home</h1>
+            <h1> Makeup Manager</h1>
         </header>
     
         <!-- navigation Bar -->
@@ -19,67 +19,134 @@
                 <li><a href="settingPage.html">Settings</a></li>
                 <li><a href="userAccount.html">Account</a></li>
             </ul>
-        </nav>    
-    <main>
-        <section id="home-recommendations">
-        </section>
-    </main>
-    <script>
+        </nav>   
         
-        fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
-            .then(response => response.json())
-            .then(data => {
-                const recommendations = document.getElementById('recommendations');
-                data.slice(0, 10).forEach(product => {
-                   
+        <!-- loading popup -->
+        <div id="loading-popup">Loading recommendations, please wait 12 seconds...</div>
+
+        <main>
+            <!-- Filter Section -->
+            <aside id="filter-container">
+                <h3>Filters</h3>
+                <ul>
+                    <li><input type="checkbox" id="foundation" name="foundation"> Foundation</li>
+                    <li><input type="checkbox" id="concealer" name="concealer"> Concealer</li>
+                    <li><input type="checkbox" id="bronzer" name="bronzer"> Bronzer</li>
+                    <li><input type="checkbox" id="lipstick" name="lipstick"> Lipstick</li>
+                    <li><input type="checkbox" id="nail-polish" name="nail_polish"> Nail Polish</li>
+                    <li><input type="checkbox" id="blush" name="blush"> Blush</li>
+                    <li><input type="checkbox" id="powder" name="powder"> Powder</li>
+                </ul>
+            </aside>
+
+            <!-- Recommendations Section -->
+            <section id="home-recommendations">
+                <h2>Welcome to Makeup Manager!</h2>
+                <br>
+                <br>
+                <h2>Makeup reccomendations for you: </h2>
+                <br>
+                <br>
+                <div id="recommendation-grid"></div>
+            </section>
+        </main>
+
+        <script>
+            const loadingPopup = document.getElementById('loading-popup');
+            const recommendationsGrid = document.getElementById('recommendation-grid');
+            const filterContainer = document.getElementById('filter-container');
+
+            let allProducts = [];
+            let filteredProducts = [];
+            let savedProducts = [];
+
+            fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
+                .then(response => response.json())
+                .then(data => {
+                    allProducts = data.map(product => {
+                        if (product.product_type === "foundation") {
+                            if (product.name.toLowerCase().includes("concealer")) {
+                                product.category = "concealer";
+                            } else if (product.name.toLowerCase().includes("bronzer")) {
+                                product.category = "bronzer";
+                            } else {
+                                product.category = "foundation"; 
+                            }
+                        }
+                        return product;
+                    });
+                    filteredProducts = getRandomProducts(allProducts, 24);
+                    displayProducts(filteredProducts);
+                    loadingPopup.style.display = 'none'; 
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    loadingPopup.innerText = 'Failed to load recommendations. Please try again later.';
+                });
+
+
+            function displayProducts(products) {
+                recommendationsGrid.innerHTML = '';
+                products.forEach(product => {
                     const productCard = document.createElement('div');
                     productCard.classList.add('product-card');
                     productCard.innerHTML = `
-                        <img src="${product.image_link}" alt="${product.name}">
+                        <img src="${product.image_link || 'https://via.placeholder.com/200'}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200';">
                         <h2>${product.name}</h2>
                         <p>${product.brand}</p>
-                        <p>$${product.price}</p>
+                        <p>$${product.price || 'N/A'}</p>
+                        <button class="save-btn" data-id="${product.id}">Save</button>
                     `;
-                    recommendations.appendChild(productCard);
+                    recommendationsGrid.appendChild(productCard);
                 });
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
+
+                document.querySelectorAll('.save-btn').forEach(button => {
+                    button.addEventListener('click', () => saveProduct(button.getAttribute('data-id')));
+                });
+            }
+
+            function getRandomProducts(array, n) {
+                const randomIndices = new Set();
+                while (randomIndices.size < n) {
+                    const randomIndex = Math.floor(Math.random() * array.length);
+                    randomIndices.add(randomIndex);
+                }
+                return Array.from(randomIndices).map(index => array[index]);
+            }
+
+            filterContainer.addEventListener('change', () => {
+                const activeFilters = Array.from(filterContainer.querySelectorAll('input:checked')).map(filter => filter.name);
+                
+                if (activeFilters.length === 0) {
+                    filteredProducts = getRandomProducts(allProducts, 24);
+                } else {
+                    filteredProducts = allProducts.filter(product => {
+                        if (activeFilters.includes("foundation") && product.product_type === "foundation") {
+                            return !["concealer", "bronzer"].includes(product.category);
+                        } else if (activeFilters.includes("concealer") && product.product_type === "foundation") {
+                            return product.category === "concealer";
+                        } else if (activeFilters.includes("bronzer") && product.product_type === "foundation") {
+                            return product.category === "bronzer";
+                        } else {
+                            return activeFilters.includes(product.product_type);
+                        }
+                    });
+                }
+
+                if (filteredProducts.length === 0) {
+                    recommendationsGrid.innerHTML = '<p>No products found for the selected filters.</p>';
+                } else {
+                    displayProducts(filteredProducts);
+                }
             });
-    </script>
-</body>
-</html>
 
-</body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            function saveProduct(productId) {
+                const product = allProducts.find(p => p.id == productId);
+                if (product && !savedProducts.includes(product)) {
+                    savedProducts.push(product);
+                    alert(`${product.name} has been saved to your list!`);
+                }
+            }
+        </script>
+    </body>
 </html>
