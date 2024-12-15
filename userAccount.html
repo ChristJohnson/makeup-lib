@@ -2,6 +2,7 @@
     <head>
         <title>User Account</title>
         <link rel="stylesheet" href="style.css" defer>
+        <script src="js/main.js" defer></script>
     </head>
     <body>
         <!--header -->
@@ -24,20 +25,65 @@
                         <h2>User Account</h2>
                         <div class="container">
                             <div class="box">
-                                <h3>Saved</h3>
-                                <div class="content saved-content">
-                                    <!-- Saved Content here -->
-                                </div>
-                                <button class="edit-btn">Edit Saved</button>
+                                <h3>Saved Products</h3>
+                                <div class="content saved-content"></div>
+                                <br>
+                                <br>  
+                                <button class="edit-btn">Clear All Saved</button>
                             </div>
-                            <div class="box">
-                                <h3>Recommended</h3>
-                                <div class="content recommended-content">
-                                    <!-- Recommended Content here -->
-                                </div>
-                                <button class="save-btn">Save</button>
-                </div>
-            </div>
-         </div>
-        </body>
+                        </div>
+                    </div>
+         <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const savedContent = document.querySelector(".saved-content");
+                let savedProducts = JSON.parse(localStorage.getItem("savedProducts")) || [];
+
+                function displaySavedProducts() {
+                    savedContent.innerHTML = "";
+
+                    if (savedProducts.length === 0) {
+                        savedContent.innerHTML = "<p>No saved products yet!</p>";
+                        return;
+                    }
+
+                    savedProducts.forEach((product, index) => {
+                        const productCard = document.createElement("div");
+                        productCard.classList.add("product-card");
+                        productCard.innerHTML = `
+                            <img src="${product.image_link || 'https://via.placeholder.com/200'}" alt="${product.name}">
+                            <h2>${product.name}</h2>
+                            <p>${product.brand || 'Unknown Brand'}</p>
+                            <p>$${product.price || 'N/A'}</p>
+                            <button class="delete-btn" data-index="${index}">Delete</button>
+                        `;
+                        savedContent.appendChild(productCard);
+                    });
+
+                    document.querySelectorAll(".delete-btn").forEach(button => {
+                        button.addEventListener("click", (e) => {
+                            const productIndex = e.target.getAttribute("data-index");
+                            deleteSavedProduct(productIndex);
+                        });
+                    });
+                }
+
+                function deleteSavedProduct(index) {
+                    savedProducts.splice(index, 1); 
+                    localStorage.setItem("savedProducts", JSON.stringify(savedProducts)); 
+                    displaySavedProducts(); 
+                }
+
+                const editBtn = document.querySelector(".edit-btn");
+                editBtn.addEventListener("click", () => {
+                    if (confirm("Are you SURE you want to clear all of your saved products?")) {
+                        savedProducts = [];
+                        localStorage.removeItem("savedProducts");
+                        displaySavedProducts();
+                    }
+                });
+
+                displaySavedProducts();
+            });
+    </script>
+</body>
 </html>

@@ -2,6 +2,7 @@
     <head>
         <title>Home Page</title>
         <link rel = "stylesheet" href="style.css">
+        <script src="js/account.js" defer></script>
     </head>
 
     <body>
@@ -43,6 +44,17 @@
                     <li><input type="checkbox" id="powder" name="powder"> Powder</li>
                 </ul>
                 <br>
+                <h3>Skin Tone Filters:</h3>
+                <ul>
+                    **This filter can ONLY be applied when foundation products are filtered**
+                </ul>
+                    <ul>
+                        <li><input type="radio" id="skin-tone-fair" name="skin-tone" value="fair"> Light</li>
+                        <li><input type="radio" id="skin-tone-medium" name="skin-tone" value="medium"> Medium</li>
+                        <li><input type="radio" id="skin-tone-dark" name="skin-tone" value="dark"> Dark</li>
+                        <li><input type="radio" id="skin-tone-none" name="skin-tone" value="none" checked> No Filter Applied</li>
+                    </ul>
+                <br>
                 <h3>Price Filters:</h3>
                 <ul>
                     <li><input type="checkbox" id="under-10" name="under-10"> Under $10</li>
@@ -65,20 +77,25 @@
         </main>
 
         <script>
-            const loadingPopup = document.getElementById('loading-popup');
             const recommendationsGrid = document.getElementById('recommendation-grid');
             const filterContainer = document.getElementById('filter-container');
             const searchBar = document.getElementById('search-bar');
+            const loadingPopup = document.getElementById('loading-popup');
 
             let allProducts = [];
             let filteredProducts = [];
-            let savedProducts = [];
+            let savedProducts = []; 
 
-            loadingPopup.style.display = 'flex'; 
-            setTimeout(() => {
-                loadingPopup.innerText = 'Still loading, please wait...'; 
-            }, 5000); // Update the message after 5 seconds of waiting
+            function showLoading() {
+                loadingPopup.style.display = 'flex';
+                loadingPopup.innerText = 'Loading recommendations, please wait...';
+            }
 
+            function hideLoading() {
+                loadingPopup.style.display = 'none';
+            }
+
+            showLoading();
             fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
                 .then(response => response.json())
                 .then(data => {
@@ -89,49 +106,44 @@
                             } else if (product.name.toLowerCase().includes("bronzer")) {
                                 product.category = "bronzer";
                             } else {
-                                product.category = "foundation"; 
+                                product.category = "foundation";
                             }
+                        } else {
+                            product.category = product.product_type;
                         }
                         return product;
                     });
 
-                    filteredProducts = getRandomProducts(allProducts, 24);
-                                
-                    setTimeout(() => {
-                        displayProducts(filteredProducts);
-                        loadingPopup.style.display = 'none'; 
-                    }, 1000); // 1-second delay
+                    filteredProducts = allProducts;
+                    displayProducts(filteredProducts);
+                    hideLoading();
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
                     loadingPopup.innerText = 'Failed to load recommendations. Please try again later.';
                 });
 
-                searchBar.addEventListener('input', () => {
-                    const searchQuery = searchBar.value.toLowerCase();
-
-                    const searchedProducts = filteredProducts.filter(product =>
-                        product.name.toLowerCase().includes(searchQuery) || 
-                        (product.brand && product.brand.toLowerCase().includes(searchQuery))
-                    );
-
-                    if (searchedProducts.length > 0) {
-                        displayProducts(searchedProducts);
-                    } else {
-                        recommendationsGrid.innerHTML = '<p>No products match your search.</p>';
-                    }
-                });
-
             function displayProducts(products) {
                 recommendationsGrid.innerHTML = '';
+                if (products.length === 0) {
+                    recommendationsGrid.innerHTML = '<p>No products found for the selected filters or search query.</p>';
+                    return;
+                }
+
                 products.forEach(product => {
                     const productCard = document.createElement('div');
                     productCard.classList.add('product-card');
+
+                    const hexValue = product.product_colors && product.product_colors.length > 0 
+                        ? product.product_colors[0].hex_value 
+                        : null;
+
                     productCard.innerHTML = `
-                        <img src="${product.image_link || 'https://via.placeholder.com/200'}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200';">
+                        <img src="${product.image_link || 'https://via.placeholder.com/200'}" alt="${product.name}">
                         <h2>${product.name}</h2>
-                        <p>${product.brand}</p>
+                        <p>${product.brand || 'Unknown Brand'}</p>
                         <p>$${product.price || 'N/A'}</p>
+                        <p>Color: ${hexValue || 'N/A'}</p>
                         <button class="save-btn" data-id="${product.id}">Save</button>
                     `;
                     recommendationsGrid.appendChild(productCard);
@@ -142,77 +154,106 @@
                 });
             }
 
-            function getRandomProducts(array, n) {
-                const randomIndices = new Set();
-                while (randomIndices.size < n) {
-                    const randomIndex = Math.floor(Math.random() * array.length);
-                    randomIndices.add(randomIndex);
-                }
-                return Array.from(randomIndices).map(index => array[index]);
-            }
+            searchBar.addEventListener('input', () => {
+                const searchQuery = searchBar.value.toLowerCase();
 
-            filterContainer.addEventListener('change', () => {
-                const activeFilters = Array.from(filterContainer.querySelectorAll('input:checked')).map(filter => filter.name);
+                const searchedProducts = filteredProducts.filter(product =>
+                    product.name.toLowerCase().includes(searchQuery) ||
+                    (product.brand && product.brand.toLowerCase().includes(searchQuery))
+                );
 
-                const categoryFilters = activeFilters.filter(filter => !filter.includes('-'));
-                const priceFilters = activeFilters.filter(filter => filter.includes('-') || filter === "50-plus");
-
-                filteredProducts = allProducts.filter(product => {
-                    let matchesCategory = false;
-                    let matchesPrice = false;
-
-                    if (categoryFilters.length === 0) {
-                        matchesCategory = true; 
-                    } else if (product.product_type === "foundation") {
-                        if (categoryFilters.includes("foundation") && !["concealer", "bronzer"].includes(product.category)) {
-                            matchesCategory = true;
-                        }
-                        if (categoryFilters.includes("concealer") && product.category === "concealer") {
-                            matchesCategory = true;
-                        }
-                        if (categoryFilters.includes("bronzer") && product.category === "bronzer") {
-                            matchesCategory = true;
-                        }
-                    } else {
-                        matchesCategory = categoryFilters.includes(product.product_type);
-                    }
-
-                    const productPrice = parseFloat(product.price) || 0;
-                    if (priceFilters.length === 0) {
-                        matchesPrice = true; 
-                    } else {
-                        if (priceFilters.includes("under-10") && productPrice < 10) {
-                            matchesPrice = true;
-                        }
-                        if (priceFilters.includes("10-20") && productPrice >= 10 && productPrice <= 20) {
-                            matchesPrice = true;
-                        }
-                        if (priceFilters.includes("20-50") && productPrice > 20 && productPrice <= 50) {
-                            matchesPrice = true;
-                        }
-                        if (priceFilters.includes("50-plus") && productPrice > 50) {
-                            matchesPrice = true;
-                        }
-                    }
-
-                    return matchesCategory && matchesPrice; 
-                });
-
-                if (filteredProducts.length === 0) {
-                    recommendationsGrid.innerHTML = '<p>No products found for the selected filters.</p>';
-                } else {
-                    displayProducts(filteredProducts);
-                }
+                displayProducts(searchedProducts);
             });
 
+            filterContainer.addEventListener('change', () => {
+                showLoading();
 
-            function saveProduct(productId) {
-                const product = allProducts.find(p => p.id == productId);
-                if (product && !savedProducts.includes(product)) {
-                    savedProducts.push(product);
-                    alert(`${product.name} has been saved to your list!`);
+                const activeCategories = Array.from(filterContainer.querySelectorAll('input[name]:checked'))
+                    .map(input => input.name);
+                const skinToneFilter = document.querySelector('input[name="skin-tone"]:checked').value;
+
+                const priceFilters = Array.from(filterContainer.querySelectorAll('input[name^="under"], input[name^="10"], input[name^="20"], input[name^="50"]'))
+                    .filter(input => input.checked)
+                    .map(input => input.name);
+
+                const isSkinToneApplicable = activeCategories.includes("foundation") ||
+                                            activeCategories.includes("concealer") ||
+                                            activeCategories.includes("bronzer");
+
+                document.querySelectorAll('input[name="skin-tone"]').forEach(input => {
+                    input.disabled = !isSkinToneApplicable;
+                });
+
+                filteredProducts = allProducts;
+
+                if (activeCategories.length > 0) {
+                    filteredProducts = filteredProducts.filter(product => activeCategories.includes(product.category));
                 }
+
+                if (isSkinToneApplicable && skinToneFilter !== "none") {
+                    filteredProducts = filteredProducts.filter(product => {
+                        const hexValue = product.product_colors && product.product_colors.length > 0 
+                            ? product.product_colors[0].hex_value 
+                            : null;
+
+                        const tone = hexValue ? getSkinToneFromHex(hexValue) : null;
+                        return tone === skinToneFilter;
+                    });
+                }
+
+                if (priceFilters.length > 0) {
+                    filteredProducts = filteredProducts.filter(product => {
+                        const price = parseFloat(product.price) || 0;
+
+                        return (
+                            (priceFilters.includes("under-10") && price < 10) ||
+                            (priceFilters.includes("10-20") && price >= 10 && price <= 20) ||
+                            (priceFilters.includes("20-50") && price > 20 && price <= 50) ||
+                            (priceFilters.includes("50-plus") && price > 50)
+                        );
+                    });
+                }
+
+                setTimeout(() => {
+                    displayProducts(filteredProducts);
+                    hideLoading();
+                }, 1000);
+            });
+
+            function hexToRgb(hex) {
+                const bigint = parseInt(hex.replace("#", ""), 16);
+                return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
             }
-        </script>
+
+            function getSkinToneFromHex(hexValue) {
+                if (!hexValue) return null;
+                const { r, g, b } = hexToRgb(hexValue);
+                const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                if (brightness > 200 && r > 200 && g > 180) return "fair";
+                if (brightness > 100 && r > 100 && g > 80 && b > 50) return "medium";
+                return "dark";
+            }
+
+
+            function saveProductToTemporaryStorage(productId) {
+            const product = allProducts.find(p => p.id == productId);
+            let savedProducts = JSON.parse(localStorage.getItem("savedProducts")) || [];
+
+            if (!savedProducts.some(p => p.id === product.id)) {
+                savedProducts.push(product);
+                localStorage.setItem("savedProducts", JSON.stringify(savedProducts));
+                alert(`"${product.name}" has been temporarily saved.`);
+            } else {
+                alert(`"${product.name}" is already saved.`);
+            }
+        }
+
+        document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("save-btn")) {
+                const productId = e.target.getAttribute("data-id");
+                saveProductToTemporaryStorage(productId);
+            }
+        });
+    </script>
     </body>
 </html>
