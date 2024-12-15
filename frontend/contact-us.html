@@ -6,7 +6,7 @@
   <body>
     <!--header -->
     <header id="header-footerbar">
-      <h1>Contact</h1>
+      <h1>Contact Us</h1>
     </header>
 
     <!-- navigation Bar -->
@@ -25,16 +25,6 @@
       <h2>Get in Touch</h2>
       <form name="contactForm" method="get" action="" id="contact-form">
         <div class="form-group">
-          <label for="contact-name">Name:</label>
-          <input
-            type="text"
-            id="contact-name"
-            placeholder="Enter your name"
-            required
-          />
-        </div>
-
-        <div class="form-group">
           <label for="contact-email">Email:</label>
           <input
             type="email"
@@ -44,11 +34,23 @@
           />
         </div>
 
+        <div class="form-group">
+          <label for="contact-message">Message</label>
+          <textarea
+            id="contact-message"
+            placeholder="Write your message..."
+            rows="10"
+            required
+          ></textarea>
+        </div>
+
         <button type="submit">Submit</button>
       </form>
     </div>
 
     <!-- Footer -->
-    <footer id="header"></footer>
+    <footer id="footer">
+      <p>Copyright by MakeupManager</p>
+    </footer>
   </body>
 </html>
