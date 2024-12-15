@@ -2,6 +2,8 @@
 <head>
     <title>About</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 </head>
 <body>
     <!--header -->
@@ -20,25 +22,89 @@
 
         </ul>
     </nav>
+    
 
     <!-- Main Content -->
-    <div class="wrapper">
-        <h2>Mission Statement</h2>
-        <p>
-            Makeup Manager was founded in 2024 and is catered to a wide variety of audiences, ranging from beginners to beauty influencers, to streamline finding accessible and affordable beauty products that cater to many different skin tones. 
-            We aim to address the lack of accessibility in finding compatible skincare and makeup products, particularly when shopping online. 
-            With the vast variety of makeup brands, products, and shades available, customers often find it overwhelming and time-consuming to select products that match their skin tone and undertones. 
-            Our website aims to streamline this process, making it easier for individuals to discover and save preferred items in a personalized color palette.
-        </p>
-
-        <h2>History</h2>
-        <p>---</p>
-
-        <h2>Fun Facts About Makeup</h2>
-        <p>----</p>
+    <div class="main-content">
+        <!-- Wrapper -->
+        <div class="aboutWrapper">
+            <h2>Mission Statement</h2>
+            <p>
+                Makeup Manager was founded in 2024 and is catered to a wide variety of audiences, ranging from beginners to beauty influencers, to streamline finding accessible and affordable beauty products that cater to many different skin tones. 
+                We aim to address the lack of accessibility in finding compatible skincare and makeup products, particularly when shopping online. 
+                With the vast variety of makeup brands, products, and shades available, customers often find it overwhelming and time-consuming to select products that match their skin tone and undertones. 
+                Our website aims to streamline this process, making it easier for individuals to discover and save preferred items in a personalized color palette.
+            </p>
+    
+            <h2>History</h2>
+            <p>---</p>
+    
+            <h2>Fun Facts About Makeup:</h2>
+            <p>----</p>
+        </div>
+    
+        <!-- Slideshow Aside -->
+        <aside class="slideshow-container">
+            <h2>MakeupManager Products</h2>
+            <br>
+            <div class="swiper">
+                <div class="swiper-wrapper" id="swiper-wrapper">
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </aside>
     </div>
+    
 
-    <!-- Footer -->
     <footer id="header"> </footer>
-</body>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const swiperWrapper = document.getElementById('swiper-wrapper');
+
+            // Fetch products from the Makeup API
+            fetch('http://makeup-api.herokuapp.com/api/v1/products.json')
+                .then(response => response.json())
+                .then(data => {
+                    // Filter products with valid image links and select 10 random ones
+                    const productsWithImages = data.filter(product => product.image_link);
+                    const randomProducts = getRandomProducts(productsWithImages, 10);
+
+                    // Create slides with only images
+                    randomProducts.forEach(product => {
+                        const slide = document.createElement('div');
+                        slide.className = 'swiper-slide';
+                        slide.innerHTML = `<img src="${product.image_link}" alt="Makeup Product">`;
+                        swiperWrapper.appendChild(slide);
+                    });
+
+                    // Initialize Swiper
+                    new Swiper('.swiper', {
+                        loop: true,
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                        },
+                        pagination: {
+                            el: '.swiper-pagination',
+                            clickable: true,
+                        },
+                    });
+                })
+                .catch(error => console.error('Error fetching makeup products:', error));
+
+            // Function to get random products
+            function getRandomProducts(array, count) {
+                const randomIndices = new Set();
+                while (randomIndices.size < count) {
+                    const randomIndex = Math.floor(Math.random() * array.length);
+                    randomIndices.add(randomIndex);
+                }
+                return Array.from(randomIndices).map(index => array[index]);
+            }
+        });
+    </script>
+    </body>
 </html>
