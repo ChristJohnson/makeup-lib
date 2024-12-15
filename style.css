@@ -250,7 +250,7 @@ button:hover {
     margin-bottom: 40px;
 }
 
-/* Wrapper (Mission Statement, History, Fun Facts) */
+/* Wrapper container for About Page*/
 .aboutWrapper {
     flex: 2;
     padding: 30px;
@@ -298,10 +298,9 @@ button:hover {
     border-radius: 8px;
 }
 
-/* Slide Images */
 .swiper-slide img {
-    width: 150px; /* Fixed image width */
-    height: 250px; /* Fixed image height */
-    object-fit: cover; /* Ensure the image fits the defined dimensions */
+    width: 150px;
+    height: 250px; 
+    object-fit: cover; 
     border-radius: 8px;
 }
