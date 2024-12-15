@@ -24,10 +24,15 @@
         <!-- loading popup -->
         <div id="loading-popup">Loading recommendations, please wait 12 seconds...</div>
 
+        <!-- search bar -->
+        <div id="search-container">
+            <input type="text" id="search-bar" placeholder="Search for products..." />
+        </div>
+
         <main>
-            <!-- Filter Section -->
+            <!-- filter section -->
             <aside id="filter-container">
-                <h3>Filters</h3>
+                <h3>Product Filters:</h3>
                 <ul>
                     <li><input type="checkbox" id="foundation" name="foundation"> Foundation</li>
                     <li><input type="checkbox" id="concealer" name="concealer"> Concealer</li>
@@ -37,9 +42,17 @@
                     <li><input type="checkbox" id="blush" name="blush"> Blush</li>
                     <li><input type="checkbox" id="powder" name="powder"> Powder</li>
                 </ul>
+                <br>
+                <h3>Price Filters:</h3>
+                <ul>
+                    <li><input type="checkbox" id="under-10" name="under-10"> Under $10</li>
+                    <li><input type="checkbox" id="10-20" name="10-20"> $10 - $20</li>
+                    <li><input type="checkbox" id="20-50" name="20-50"> $20 - $50</li>
+                    <li><input type="checkbox" id="50-plus" name="50-plus"> $50 and above</li>
+                </ul>
             </aside>
 
-            <!-- Recommendations Section -->
+            <!-- recommendations section with headers-->
             <section id="home-recommendations">
                 <h2>Welcome to Makeup Manager!</h2>
                 <br>
@@ -83,7 +96,23 @@
                     console.error('Error fetching data:', error);
                     loadingPopup.innerText = 'Failed to load recommendations. Please try again later.';
                 });
+            
+                const searchBar = document.getElementById('search-bar');
 
+                searchBar.addEventListener('input', () => {
+                    const searchQuery = searchBar.value.toLowerCase();
+
+                    const searchedProducts = filteredProducts.filter(product =>
+                        product.name.toLowerCase().includes(searchQuery) || 
+                        (product.brand && product.brand.toLowerCase().includes(searchQuery))
+                    );
+
+                    if (searchedProducts.length > 0) {
+                        displayProducts(searchedProducts);
+                    } else {
+                        recommendationsGrid.innerHTML = '<p>No products match your search.</p>';
+                    }
+                });
 
             function displayProducts(products) {
                 recommendationsGrid.innerHTML = '';
@@ -116,22 +145,50 @@
 
             filterContainer.addEventListener('change', () => {
                 const activeFilters = Array.from(filterContainer.querySelectorAll('input:checked')).map(filter => filter.name);
-                
-                if (activeFilters.length === 0) {
-                    filteredProducts = getRandomProducts(allProducts, 24);
-                } else {
-                    filteredProducts = allProducts.filter(product => {
-                        if (activeFilters.includes("foundation") && product.product_type === "foundation") {
-                            return !["concealer", "bronzer"].includes(product.category);
-                        } else if (activeFilters.includes("concealer") && product.product_type === "foundation") {
-                            return product.category === "concealer";
-                        } else if (activeFilters.includes("bronzer") && product.product_type === "foundation") {
-                            return product.category === "bronzer";
-                        } else {
-                            return activeFilters.includes(product.product_type);
+
+                const categoryFilters = activeFilters.filter(filter => !filter.includes('-'));
+                const priceFilters = activeFilters.filter(filter => filter.includes('-') || filter === "50-plus");
+
+                filteredProducts = allProducts.filter(product => {
+                    let matchesCategory = false;
+                    let matchesPrice = false;
+
+                    if (categoryFilters.length === 0) {
+                        matchesCategory = true; 
+                    } else if (product.product_type === "foundation") {
+                        if (categoryFilters.includes("foundation") && !["concealer", "bronzer"].includes(product.category)) {
+                            matchesCategory = true;
                         }
-                    });
-                }
+                        if (categoryFilters.includes("concealer") && product.category === "concealer") {
+                            matchesCategory = true;
+                        }
+                        if (categoryFilters.includes("bronzer") && product.category === "bronzer") {
+                            matchesCategory = true;
+                        }
+                    } else {
+                        matchesCategory = categoryFilters.includes(product.product_type);
+                    }
+
+                    const productPrice = parseFloat(product.price) || 0;
+                    if (priceFilters.length === 0) {
+                        matchesPrice = true; 
+                    } else {
+                        if (priceFilters.includes("under-10") && productPrice < 10) {
+                            matchesPrice = true;
+                        }
+                        if (priceFilters.includes("10-20") && productPrice >= 10 && productPrice <= 20) {
+                            matchesPrice = true;
+                        }
+                        if (priceFilters.includes("20-50") && productPrice > 20 && productPrice <= 50) {
+                            matchesPrice = true;
+                        }
+                        if (priceFilters.includes("50-plus") && productPrice > 50) {
+                            matchesPrice = true;
+                        }
+                    }
+
+                    return matchesCategory && matchesPrice; 
+                });
 
                 if (filteredProducts.length === 0) {
                     recommendationsGrid.innerHTML = '<p>No products found for the selected filters.</p>';
@@ -139,6 +196,7 @@
                     displayProducts(filteredProducts);
                 }
             });
+
 
             function saveProduct(productId) {
                 const product = allProducts.find(p => p.id == productId);

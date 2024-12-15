@@ -20,6 +20,27 @@ body {
     margin-bottom: 20px;
 }
 
+#search-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#search-bar {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+#search-bar:focus {
+    border-color: #e63946;
+    box-shadow: 0 2px 4px rgba(230, 57, 70, 0.2);
+}
+
+
 #main-nav {
     background-color: #e63956;
     padding: 10px;
