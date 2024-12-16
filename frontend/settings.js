@@ -35,6 +35,5 @@ $("form").on("submit", (ev) => {
       "Content-Length": postData.length,
     },
     body: postData,
-    requestOptions,
   });
 });
