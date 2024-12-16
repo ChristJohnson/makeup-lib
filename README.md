@@ -36,26 +36,26 @@ git clone https://github.com/ChristJohnson/makeup-lib.git
 
 ## Run on server
 To run our application on a server:
-cd makeup-lib
-npm start
-http://localhost: 
+- cd makeup-lib
+- npm start
+- http://localhost: 
 
 ---
 
 ## Run tests
-Common js folders run to the API
+- Common js folders run to the API
 
 ---
 
 ## API and endpoints
-User endpoint does POST & GET to return values
-Contact me writes to a file and has a post
+- User endpoint does POST & GET to return values
+- Contact Me Page writes to a file and has a post
 
 ---
 
 ## Bugs and future development
-API images sometimes do not load properly
-The filter selection tends to not smoothly scroll at times
+- API images sometimes do not load properly
+- The filter selection tends to not smoothly scroll at times
 
 
 
