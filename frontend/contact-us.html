@@ -52,5 +52,16 @@
     <footer id="footer">
       <p>Copyright by MakeupManager</p>
     </footer>
+    <script>
+      // js for dark mode 
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+
+            // apply Dark Mode enabled
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                body.classList.add('dark-mode');
+            }
+        });
+    </script>
   </body>
 </html>
