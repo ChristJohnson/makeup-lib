@@ -6,10 +6,14 @@ url.port = 3000;
 console.log(`sending request to ${url}`);
 
 const postData = JSON.stringify({
-  flags: 1,
+  flags: 3,
   name: "testmod",
   email: "testing3@example.com",
   age: 25,
+
+  user_id: 5,
+  palette_name: "foobar",
+  palette_data: [1, 2, 3, 4, 5, 6, 7],
 });
 
 const options = {

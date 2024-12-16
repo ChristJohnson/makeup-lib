@@ -5,9 +5,9 @@ export const name = "makeup-api-supabase";
 // TODO(chantel): fill in the blanks
 // Create a single supabase client for interacting with your database
 const supabase = createClient(
-    "https://axlkpyetnmbcnzncpwvp.supabase.co",
+  "https://axlkpyetnmbcnzncpwvp.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGtweWV0bm1iY256bmNwd3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQwNjAzMDgsImV4cCI6MjA0OTYzNjMwOH0.hKKyYuNkQ7NyRJif0sZZfps_5Fr8T-4LgYN6s-UGHtY"
-)
+);
 export default supabase;
 
 /*
@@ -55,7 +55,7 @@ function Palette(name, data) {
  * @return the associated user_id
  */
 export async function addUser(name, email, age) {
-    const { data: existingUser, error: selectError } = await supabase
+  const { data: existingUser, error: selectError } = await supabase
     .from("users")
     .select("user_id")
     .eq("email", email);
@@ -63,7 +63,7 @@ export async function addUser(name, email, age) {
   if (selectError) throw selectError;
 
   if (existingUser.length > 0) {
-    return existingUser[0].user_id; 
+    return existingUser[0].user_id;
   }
 
   const { data: newUser, error: insertError } = await supabase
@@ -73,21 +73,20 @@ export async function addUser(name, email, age) {
 
   if (insertError) throw insertError;
 
-  return newUser[0].user_id; 
+  return newUser[0].user_id;
 }
-
 
 /**
  * @return user data based on user_id
  */
 export async function getUser(user_id) {
-    const { data, error } = await supabase
+  const { data, error } = await supabase
     .from("users")
     .select("name, email, age")
     .eq("user_id", user_id)
-    .single(); 
+    .single();
   if (error) throw error;
-  return new User("Chris Johnson", "test@example.com", 22);
+  return data;
 }
 
 /**
@@ -96,7 +95,7 @@ export async function getUser(user_id) {
  * @returns the associated palette_id
  */
 export async function addPalette(user_id, palette_name, palette_data) {
-    const { data: palette, error: insertPaletteError } = await supabase
+  const { data: palette, error: insertPaletteError } = await supabase
     .from("palettes")
     .insert({ palette_name, palette_data })
     .select("palette_id");
@@ -118,7 +117,7 @@ export async function addPalette(user_id, palette_name, palette_data) {
  * @return palette based on palette_id
  */
 export function getPalette(palette_id) {
-    const { data, error } = supabase
+  const { data, error } = supabase
     .from("palettes")
     .select("palette_name, palette_data")
     .eq("palette_id", palette_id)
@@ -132,14 +131,19 @@ export function getPalette(palette_id) {
  * @return all palettes related to a user_id (array)
  */
 export function getPalettesByUser(user_id) {
-    const { data, error } = supabase
+  const { data, error } = supabase
     .from("user_palettes")
-    .select(`
+    .select(
+      `
       palettes (palette_name, palette_data)
-    `)
+    `
+    )
     .eq("user_id", user_id);
 
   if (error) throw error;
 
-  return data.map((entry) => new Palette(entry.palettes.palette_name, entry.palettes.palette_data));
+  return data.map(
+    (entry) =>
+      new Palette(entry.palettes.palette_name, entry.palettes.palette_data)
+  );
 }

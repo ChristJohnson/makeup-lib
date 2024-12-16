@@ -1,3 +1,8 @@
+# some incidental files
+.DS_Store
+.vscode/
+INST377-Final\ Project/
+
 # contactme file
 contactme.txt
 
@@ -132,3 +137,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .vercel
+.env*.local
