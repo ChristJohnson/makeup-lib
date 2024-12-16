@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 $("form").on("submit", (ev) => {
   const postData = JSON.stringify({
+    flags: 1,
     name: $("#user-name").val(),
     email: $("#user-email").val(),
     age: $("#user-age").val(),
