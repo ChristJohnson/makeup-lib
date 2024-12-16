@@ -1,60 +1,62 @@
 <html>
-    <head>
-        <title>User Account</title>
-        <link rel="stylesheet" href="style.css" defer>
-        <!--JS Library: JQuery-->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script src="js/main.js" defer></script>
-    </head>
-    <body>
-        <!--header -->
-        <header id="header-footerbar">
-            <h1>Your Account</h1>
-        </header>
-    
-        <!-- navigation Bar -->
-        <nav id="main-nav">
-            <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact-us.html">Contact</a></li>
-        <li><a href="settings.html">Settings</a></li>
-        <li><a href="account.html">Account</a></li>
-      </ul>
-                    </nav>
-                    <div class="user-account">
-                        <h2>User Account</h2>
-                        <div class="container">
-                            <div class="box">
-                                <h3>Saved Products</h3>
-                                <div class="content saved-content"></div>
-                                <br>
-                                <br>  
-                                <button class="edit-btn">Clear All Saved</button>
-                            </div>
-                        </div>
-                    </div>
-                    <br>
-        <!-- Footer -->
-        <footer id="footer">
-            <p>Copyright by MakeupManager</p>
-        </footer>
-        
-            <script>
-                $(document).ready(function () {
-                    const $savedContent = $(".saved-content");
-                    let savedProducts = JSON.parse(localStorage.getItem("savedProducts")) || [];
 
-                    function displaySavedProducts() {
-                        $savedContent.empty();
+<head>
+    <title>User Account</title>
+    <link rel="stylesheet" href="style.css" defer>
+    <!--JS Library: JQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="js/main.js" defer></script>
+</head>
 
-                        if (savedProducts.length === 0) {
-                            $savedContent.html("<p>No saved products yet!</p>");
-                            return;
-                        }
+<body>
+    <!--header -->
+    <header id="header-footerbar">
+        <h1>Your Account</h1>
+    </header>
 
-                        savedProducts.forEach((product, index) => {
-                            const productCard = `
+    <!-- navigation Bar -->
+    <nav id="main-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact-us.html">Contact</a></li>
+            <li><a href="settings.html">Settings</a></li>
+            <li><a href="account.html">Account</a></li>
+        </ul>
+    </nav>
+    <div class="user-account">
+        <h2>User Account</h2>
+        <div class="container">
+            <div class="box">
+                <h3>Saved Products</h3>
+                <div class="content saved-content"></div>
+                <br>
+                <br>
+                <button class="edit-btn">Clear All Saved</button>
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- Footer -->
+    <footer id="footer">
+        <p>Copyright by MakeupManager</p>
+    </footer>
+
+    <script>
+        $(document).ready(function () {
+            const $savedContent = $(".saved-content");
+            let savedProducts = JSON.parse(localStorage.getItem("savedProducts")) || [];
+
+            function displaySavedProducts() {
+                $savedContent.empty();
+
+                if (savedProducts.length === 0) {
+                    $savedContent.html("<p>No saved products yet!</p>");
+                    return;
+                }
+
+                savedProducts.forEach((product, index) => {
+                    const productCard = `
                                 <div class="product-card">
                                     <img src="${product.image_link || 'https://via.placeholder.com/200'}" alt="${product.name}">
                                     <h2>${product.name}</h2>
@@ -63,31 +65,40 @@
                                     <button class="delete-btn" data-index="${index}">Delete</button>
                                 </div>
                             `;
-                            $savedContent.append(productCard);
-                        });
-
-                        $(".delete-btn").on("click", function () {
-                            const productIndex = $(this).data("index");
-                            deleteSavedProduct(productIndex);
-                        });
-                    }
-
-                    function deleteSavedProduct(index) {
-                        savedProducts.splice(index, 1); 
-                        localStorage.setItem("savedProducts", JSON.stringify(savedProducts)); 
-                        displaySavedProducts(); 
-                    }
-
-                    $(".edit-btn").on("click", function () {
-                        if (confirm("Are you SURE you want to clear all of your saved products?")) {
-                            savedProducts = [];
-                            localStorage.removeItem("savedProducts");
-                            displaySavedProducts();
-                        }
-                    });
-
-                    displaySavedProducts();
+                    $savedContent.append(productCard);
                 });
-        </script>
-    </body>
+
+                $(".delete-btn").on("click", function () {
+                    const productIndex = $(this).data("index");
+                    deleteSavedProduct(productIndex);
+                });
+            }
+
+            function deleteSavedProduct(index) {
+                savedProducts.splice(index, 1);
+                localStorage.setItem("savedProducts", JSON.stringify(savedProducts));
+                displaySavedProducts();
+            }
+
+            $(".edit-btn").on("click", function () {
+                if (confirm("Are you SURE you want to clear all of your saved products?")) {
+                    savedProducts = [];
+                    localStorage.removeItem("savedProducts");
+                    displaySavedProducts();
+                }
+            });
+
+            displaySavedProducts();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+
+            // Apply Dark Mode enabled
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                body.classList.add('dark-mode');
+            }
+        });
+    </script>
+</body>
+
 </html>
